@@ -8,12 +8,16 @@
   </head>
   <body>
     <div class="container">
+      <div class="header">
+        <h1>제품 리스트</h1>
+        <p>카테고리별로 제품을 필터링하여 확인하세요</p>
+      </div>
+
       <div class="filters">
         <div id="previewNotice" class="preview-notice">
-          <strong>미리보기 모드:</strong> 상위 3개 제품만 표시됩니다. 전체
-          제품을 보려면 패스워드를 입력하세요.
+          <strong>미리보기 모드:</strong> 상위 3개 제품만 표시됩니다. 전체 제품을
+          보려면 패스워드를 입력하세요.
         </div>
-
         <div class="filter-group">
           <div class="filter-item">
             <label for="category">카테고리</label>
@@ -30,15 +34,18 @@
             />
           </div>
         </div>
-        <div class="stats">
-          <h3>총 <span id="total-count">0</span>개 제품</h3>
-          <p>현재 필터: <span id="current-filter">전체</span></p>
-        </div>
       </div>
 
-      <div id="loading" class="loading">데이터를 불러오는 중...</div>
+      <div class="stats">
+        <h3>총 <span id="total-count">0</span>개 제품</h3>
+        <p>현재 필터: <span id="current-filter">전체</span></p>
+      </div>
 
-      <div id="no-results" class="no-results" style="display: none">
+      <div id="loading" class="loading">
+        데이터를 불러오는 중...
+      </div>
+
+      <div id="no-results" class="no-results" style="display: none;">
         검색 결과가 없습니다.
       </div>
 
@@ -58,6 +65,19 @@
         </div>
       </div>
       <div id="passwordStatus"></div>
+    </div>
+
+    <!-- 쿠팡 파트너스 모달 -->
+    <div id="coupangModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>쿠팡에서 구매하기</h3>
+          <span class="close" onclick="closeModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div id="coupangIframe"></div>
+        </div>
+      </div>
     </div>
 
     <script src="script.js"></script>

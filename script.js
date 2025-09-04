@@ -112,7 +112,7 @@ function displayProducts() {
     // 인증되지 않은 경우 상위 3개만 표시
     const productsToShow = isAuthenticated ? filteredProducts : filteredProducts.slice(0, 3);
     
-    grid.innerHTML = productsToShow.map(product => `
+    grid.innerHTML = productsToShow.map((product, index) => `
         <div class="product-card">
             <div class="product-title">${product['제품명_정제'] || '제품명 없음'}</div>
             <div class="product-brand">${product['브랜드명_kor'] || ''} ${product['브랜드명_eng'] || ''}</div>
@@ -120,7 +120,7 @@ function displayProducts() {
             <div class="product-actions">
                 ${product['제품링크'] ? `<a href="${product['제품링크']}" target="_blank" class="product-link">제품 보기</a>` : ''}
                 ${product['쿠팡 파트너스 링크'] ? 
-                    `<a href="${product['쿠팡 파트너스 링크']}" target="_blank" class="purchase-btn">구매하기</a>` : 
+                    `<button class="purchase-btn" onclick="openCoupangModal('${product['쿠팡 파트너스 링크'].replace(/'/g, "\\'")}')">구매하기</button>` : 
                     '<span class="purchase-btn-disabled">구매하기 (링크 준비중)</span>'
                 }
             </div>
@@ -132,6 +132,36 @@ function displayProducts() {
             ` : ''}
         </div>
     `).join('');
+}
+
+// 쿠팡 모달 열기
+function openCoupangModal(iframeCode) {
+    const modal = document.getElementById('coupangModal');
+    const iframeContainer = document.getElementById('coupangIframe');
+    
+    // iframe 코드를 HTML로 삽입
+    iframeContainer.innerHTML = iframeCode;
+    
+    // 모달 표시
+    modal.style.display = 'block';
+    
+    // body 스크롤 방지
+    document.body.style.overflow = 'hidden';
+}
+
+// 쿠팡 모달 닫기
+function closeModal() {
+    const modal = document.getElementById('coupangModal');
+    const iframeContainer = document.getElementById('coupangIframe');
+    
+    // 모달 숨기기
+    modal.style.display = 'none';
+    
+    // iframe 내용 제거
+    iframeContainer.innerHTML = '';
+    
+    // body 스크롤 복원
+    document.body.style.overflow = 'auto';
 }
 
 // 통계 업데이트
@@ -172,6 +202,21 @@ function initializeEventListeners() {
     // 카테고리 및 검색 필터
     document.getElementById('category').addEventListener('change', filterProducts);
     document.getElementById('search').addEventListener('input', filterProducts);
+
+    // 모달 외부 클릭 시 닫기
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('coupangModal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+
+    // ESC 키로 모달 닫기
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    });
 }
 
 // 페이지 로드 시 초기화
