@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>제품 리스트 - 카테고리 필터</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .filters {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-item label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .filter-item select {
+            padding: 10px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .filter-item select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .filter-item select:disabled {
+            background-color: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+            border-color: #ddd;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .stats {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .stats h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .product-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .product-brand {
+            color: #667eea;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .product-category {
+            background: #f8f9fa;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            color: #666;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .product-link {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 8px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+
+        .product-link:hover {
+            background: #5a6fd8;
+        }
+
+        .ingredients {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .ingredients h4 {
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .ingredients-list {
+            font-size: 0.8rem;
+            color: #666;
+            line-height: 1.4;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>제품 리스트</h1>
+            <p>카테고리별로 제품을 필터링하여 확인하세요</p>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <div class="filter-item">
+                    <label for="category1">1차 카테고리</label>
+                    <select id="category1">
+                        <option value="">전체</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label for="category2">2차 카테고리</label>
+                    <select id="category2" disabled>
+                        <option value="">전체</option>
+                    </select>
+                </div>
+                <div class="filter-item search-box">
+                    <label for="search">제품명 검색</label>
+                    <input type="text" id="search" placeholder="제품명을 입력하세요...">
+                </div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <h3>총 <span id="total-count">0</span>개 제품</h3>
+            <p>현재 필터: <span id="current-filter">전체</span></p>
+        </div>
+
+        <div id="loading" class="loading">
+            데이터를 불러오는 중...
+        </div>
+
+        <div id="no-results" class="no-results" style="display: none;">
+            검색 결과가 없습니다.
+        </div>
+
+        <div id="product-grid" class="product-grid">
+        </div>
+    </div>
+
+    <script>
+        let products = [];
+        let filteredProducts = [];
+
+        // JSON 파일 로드
+        async function loadProducts() {
+            try {
+                const response = await fetch('product_list_db_updated.json');
+                products = await response.json();
+                filteredProducts = [...products];
+                
+                populateCategoryFilters();
+                displayProducts();
+                updateStats();
+                
+                document.getElementById('loading').style.display = 'none';
+            } catch (error) {
+                console.error('데이터 로드 오류:', error);
+                document.getElementById('loading').innerHTML = '데이터를 불러올 수 없습니다.';
+            }
+        }
+
+        // 카테고리 필터 옵션 생성
+        function populateCategoryFilters() {
+            const category1Select = document.getElementById('category1');
+            const category2Select = document.getElementById('category2');
+            
+            // 1차 카테고리 옵션 생성 (카테고리 번호 기준 오름차순 정렬)
+            const category1Map = new Map();
+            products.forEach(product => {
+                if (product['1차 카테고리'] && product['1차 카테고리 No']) {
+                    category1Map.set(product['1차 카테고리'], product['1차 카테고리 No']);
+                }
+            });
+            
+            // 카테고리 번호 기준으로 오름차순 정렬
+            const sortedCategory1 = Array.from(category1Map.entries())
+                .sort((a, b) => a[1] - b[1]);
+            
+            sortedCategory1.forEach(([category, number]) => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = `${category} (${number})`;
+                category1Select.appendChild(option);
+            });
+        }
+
+        // 1차 카테고리 변경 시 2차 카테고리 업데이트
+        function updateCategory2Options() {
+            const category1 = document.getElementById('category1').value;
+            const category2Select = document.getElementById('category2');
+            
+            // 2차 카테고리 옵션 초기화
+            category2Select.innerHTML = '<option value="">전체</option>';
+            
+            if (category1) {
+                // 선택된 1차 카테고리에 해당하는 2차 카테고리만 필터링
+                const category2Map = new Map();
+                products.forEach(product => {
+                    if (product['1차 카테고리'] === category1 && 
+                        product['2차 카테고리'] && 
+                        product['2차 카테고리 No']) {
+                        category2Map.set(product['2차 카테고리'], product['2차 카테고리 No']);
+                    }
+                });
+                
+                // 카테고리 번호 기준으로 오름차순 정렬
+                const sortedCategory2 = Array.from(category2Map.entries())
+                    .sort((a, b) => a[1] - b[1]);
+                
+                sortedCategory2.forEach(([category, number]) => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = `${category} (${number})`;
+                    category2Select.appendChild(option);
+                });
+                
+                // 2차 카테고리 활성화
+                category2Select.disabled = false;
+            } else {
+                // 1차 카테고리가 선택되지 않으면 2차 카테고리 비활성화
+                category2Select.disabled = true;
+            }
+        }
+
+        // 제품 필터링
+        function filterProducts() {
+            const category1 = document.getElementById('category1').value;
+            const category2 = document.getElementById('category2').value;
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+
+            filteredProducts = products.filter(product => {
+                const matchesCategory1 = !category1 || product['1차 카테고리'] === category1;
+                const matchesCategory2 = !category2 || product['2차 카테고리'] === category2;
+                const matchesSearch = !searchTerm || 
+                    (product['제품명_정제'] && product['제품명_정제'].toLowerCase().includes(searchTerm)) ||
+                    (product['브랜드명_kor'] && product['브랜드명_kor'].toLowerCase().includes(searchTerm));
+
+                return matchesCategory1 && matchesCategory2 && matchesSearch;
+            });
+
+            displayProducts();
+            updateStats();
+        }
+
+        // 제품 목록 표시
+        function displayProducts() {
+            const grid = document.getElementById('product-grid');
+            const noResults = document.getElementById('no-results');
+            
+            if (filteredProducts.length === 0) {
+                grid.innerHTML = '';
+                noResults.style.display = 'block';
+                return;
+            }
+
+            noResults.style.display = 'none';
+            
+            grid.innerHTML = filteredProducts.map(product => `
+                <div class="product-card">
+                    <div class="product-title">${product['제품명_정제'] || '제품명 없음'}</div>
+                    <div class="product-brand">${product['브랜드명_kor'] || ''} ${product['브랜드명_eng'] || ''}</div>
+                    <div class="product-category">${product['1차 카테고리'] || ''} > ${product['2차 카테고리'] || ''}</div>
+                    ${product['제품링크'] ? `<a href="${product['제품링크']}" target="_blank" class="product-link">제품 보기</a>` : ''}
+                    ${product['전성분_processed'] ? `
+                        <div class="ingredients">
+                            <h4>주요 성분</h4>
+                            <div class="ingredients-list">${product['전성분_processed'].slice(0, 200)}${product['전성분_processed'].length > 200 ? '...' : ''}</div>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // 통계 업데이트
+        function updateStats() {
+            document.getElementById('total-count').textContent = filteredProducts.length;
+            
+            const category1 = document.getElementById('category1').value;
+            const category2 = document.getElementById('category2').value;
+            const searchTerm = document.getElementById('search').value;
+            
+            let filterText = '전체';
+            if (category1 || category2 || searchTerm) {
+                const filters = [];
+                if (category1) filters.push(`1차: ${category1}`);
+                if (category2) filters.push(`2차: ${category2}`);
+                if (searchTerm) filters.push(`검색: ${searchTerm}`);
+                filterText = filters.join(', ');
+            }
+            
+            document.getElementById('current-filter').textContent = filterText;
+        }
+
+        // 이벤트 리스너 등록
+        document.getElementById('category1').addEventListener('change', function() {
+            updateCategory2Options();
+            filterProducts();
+        });
+        
+        document.getElementById('category2').addEventListener('change', filterProducts);
+        document.getElementById('search').addEventListener('input', filterProducts);
+
+        // 페이지 로드 시 데이터 로드
+        loadProducts();
+    </script>
+</body>
+</html>
