@@ -119,8 +119,8 @@ function displayProducts() {
             <div class="product-category">${product['1차 카테고리'] || ''} > ${product['2차 카테고리'] || ''}</div>
             <div class="product-actions">
                 ${product['제품링크'] ? `<a href="${product['제품링크']}" target="_blank" class="product-link">제품 보기</a>` : ''}
-                ${product['쿠팡 파트너스 링크'] ? 
-                    `<button class="purchase-btn" onclick="openCoupangModal('${product['쿠팡 파트너스 링크'].replace(/'/g, "\\'")}')">구매하기</button>` : 
+                ${product['쿠팡 파트너스 링크'] && product['쿠팡 파트너스 링크'].trim() !== '' ? 
+                    `<button class="purchase-btn" onclick="openCoupangModal(${index})">구매하기</button>` : 
                     '<span class="purchase-btn-disabled">구매하기 (링크 준비중)</span>'
                 }
             </div>
@@ -135,18 +135,26 @@ function displayProducts() {
 }
 
 // 쿠팡 모달 열기
-function openCoupangModal(iframeCode) {
+function openCoupangModal(productIndex) {
     const modal = document.getElementById('coupangModal');
     const iframeContainer = document.getElementById('coupangIframe');
     
-    // iframe 코드를 HTML로 삽입
-    iframeContainer.innerHTML = iframeCode;
+    // 현재 표시된 제품들 중에서 해당 인덱스의 제품 찾기
+    const productsToShow = isAuthenticated ? filteredProducts : filteredProducts.slice(0, 3);
+    const product = productsToShow[productIndex];
     
-    // 모달 표시
-    modal.style.display = 'block';
-    
-    // body 스크롤 방지
-    document.body.style.overflow = 'hidden';
+    if (product && product['쿠팡 파트너스 링크']) {
+        // iframe 코드를 HTML로 삽입
+        iframeContainer.innerHTML = product['쿠팡 파트너스 링크'];
+        
+        // 모달 표시
+        modal.style.display = 'block';
+        
+        // body 스크롤 방지
+        document.body.style.overflow = 'hidden';
+    } else {
+        alert('쿠팡 파트너스 링크를 찾을 수 없습니다.');
+    }
 }
 
 // 쿠팡 모달 닫기
