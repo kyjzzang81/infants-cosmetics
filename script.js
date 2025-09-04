@@ -117,7 +117,13 @@ function displayProducts() {
             <div class="product-title">${product['제품명_정제'] || '제품명 없음'}</div>
             <div class="product-brand">${product['브랜드명_kor'] || ''} ${product['브랜드명_eng'] || ''}</div>
             <div class="product-category">${product['1차 카테고리'] || ''} > ${product['2차 카테고리'] || ''}</div>
-            ${product['제품링크'] ? `<a href="${product['제품링크']}" target="_blank" class="product-link">제품 보기</a>` : ''}
+            <div class="product-actions">
+                ${product['제품링크'] ? `<a href="${product['제품링크']}" target="_blank" class="product-link">제품 보기</a>` : ''}
+                ${product['쿠팡 파트너스 링크'] ? 
+                    `<a href="${product['쿠팡 파트너스 링크']}" target="_blank" class="purchase-btn">구매하기</a>` : 
+                    '<span class="purchase-btn-disabled">구매하기 (링크 준비중)</span>'
+                }
+            </div>
             ${product['전성분_processed'] ? `
                 <div class="ingredients">
                     <h4>주요 성분</h4>

@@ -222,6 +222,13 @@ body {
     margin-bottom: 15px;
 }
 
+.product-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
 .product-link {
     display: inline-block;
     background: #667eea;
@@ -235,6 +242,33 @@ body {
 
 .product-link:hover {
     background: #5a6fd8;
+}
+
+.purchase-btn {
+    display: inline-block;
+    background: #ff6b35;
+    color: white;
+    padding: 8px 15px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+.purchase-btn:hover {
+    background: #e55a2b;
+}
+
+.purchase-btn-disabled {
+    display: inline-block;
+    background: #ccc;
+    color: #666;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: not-allowed;
 }
 
 .ingredients {
@@ -304,5 +338,14 @@ body {
 
     .password-input input {
         min-width: 100%;
+    }
+
+    .product-actions {
+        flex-direction: column;
+    }
+
+    .product-link,
+    .purchase-btn {
+        text-align: center;
     }
 }
