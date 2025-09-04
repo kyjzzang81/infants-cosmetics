@@ -44,6 +44,75 @@
             opacity: 0.9;
         }
 
+        .password-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .password-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .password-input {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .password-input input {
+            padding: 10px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 250px;
+        }
+
+        .password-input input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .password-btn {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .password-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .password-status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+
+        .password-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .password-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
         .filters {
             background: white;
             padding: 25px;
@@ -215,6 +284,16 @@
             color: #666;
         }
 
+        .preview-notice {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ffeaa7;
+            text-align: center;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -232,6 +311,14 @@
             .product-grid {
                 grid-template-columns: 1fr;
             }
+
+            .password-input {
+                flex-direction: column;
+            }
+
+            .password-input input {
+                min-width: 100%;
+            }
         }
     </style>
 </head>
@@ -240,6 +327,19 @@
         <div class="header">
             <h1>제품 리스트</h1>
             <p>카테고리별로 제품을 필터링하여 확인하세요</p>
+        </div>
+
+        <div class="password-section">
+            <h3>전체 제품 보기</h3>
+            <div class="password-input">
+                <input type="password" id="passwordInput" placeholder="패스워드를 입력하세요">
+                <button class="password-btn" onclick="checkPassword()">인증</button>
+            </div>
+            <div id="passwordStatus"></div>
+        </div>
+
+        <div id="previewNotice" class="preview-notice">
+            <strong>미리보기 모드:</strong> 상위 3개 제품만 표시됩니다. 전체 제품을 보려면 패스워드를 입력하세요.
         </div>
 
         <div class="filters">
@@ -283,6 +383,8 @@
     <script>
         let products = [];
         let filteredProducts = [];
+        let isAuthenticated = false;
+        const PASSWORD = '8092#$%bambit@#111$%';
 
         // JSON 파일 로드
         async function loadProducts() {
@@ -301,6 +403,34 @@
                 document.getElementById('loading').innerHTML = '데이터를 불러올 수 없습니다.';
             }
         }
+
+        // 패스워드 확인
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value;
+            const statusDiv = document.getElementById('passwordStatus');
+            
+            if (input === PASSWORD) {
+                isAuthenticated = true;
+                statusDiv.innerHTML = '<div class="password-success">✅ 인증 성공! 전체 제품을 볼 수 있습니다.</div>';
+                document.getElementById('previewNotice').style.display = 'none';
+                document.getElementById('passwordInput').value = '';
+                displayProducts();
+                updateStats();
+            } else {
+                isAuthenticated = false;
+                statusDiv.innerHTML = '<div class="password-error">❌ 잘못된 패스워드입니다.</div>';
+                document.getElementById('previewNotice').style.display = 'block';
+                displayProducts();
+                updateStats();
+            }
+        }
+
+        // 엔터키로 패스워드 확인
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
 
         // 카테고리 필터 옵션 생성
         function populateCategoryFilters() {
@@ -398,7 +528,10 @@
 
             noResults.style.display = 'none';
             
-            grid.innerHTML = filteredProducts.map(product => `
+            // 인증되지 않은 경우 상위 3개만 표시
+            const productsToShow = isAuthenticated ? filteredProducts : filteredProducts.slice(0, 3);
+            
+            grid.innerHTML = productsToShow.map(product => `
                 <div class="product-card">
                     <div class="product-title">${product['제품명_정제'] || '제품명 없음'}</div>
                     <div class="product-brand">${product['브랜드명_kor'] || ''} ${product['브랜드명_eng'] || ''}</div>
@@ -416,7 +549,8 @@
 
         // 통계 업데이트
         function updateStats() {
-            document.getElementById('total-count').textContent = filteredProducts.length;
+            const totalProducts = isAuthenticated ? filteredProducts.length : Math.min(filteredProducts.length, 3);
+            document.getElementById('total-count').textContent = totalProducts;
             
             const category1 = document.getElementById('category1').value;
             const category2 = document.getElementById('category2').value;
@@ -429,6 +563,10 @@
                 if (category2) filters.push(`2차: ${category2}`);
                 if (searchTerm) filters.push(`검색: ${searchTerm}`);
                 filterText = filters.join(', ');
+            }
+            
+            if (!isAuthenticated && filteredProducts.length > 3) {
+                filterText += ` (미리보기: ${totalProducts}/${filteredProducts.length})`;
             }
             
             document.getElementById('current-filter').textContent = filterText;
