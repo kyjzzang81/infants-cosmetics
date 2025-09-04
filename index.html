@@ -154,13 +154,6 @@
             border-color: #667eea;
         }
 
-        .filter-item select:disabled {
-            background-color: #f5f5f5;
-            color: #999;
-            cursor: not-allowed;
-            border-color: #ddd;
-        }
-
         .search-box {
             flex: 1;
             min-width: 200px;
@@ -345,14 +338,8 @@
         <div class="filters">
             <div class="filter-group">
                 <div class="filter-item">
-                    <label for="category1">1차 카테고리</label>
-                    <select id="category1">
-                        <option value="">전체</option>
-                    </select>
-                </div>
-                <div class="filter-item">
-                    <label for="category2">2차 카테고리</label>
-                    <select id="category2" disabled>
+                    <label for="category">카테고리</label>
+                    <select id="category">
                         <option value="">전체</option>
                     </select>
                 </div>
@@ -434,81 +421,52 @@
 
         // 카테고리 필터 옵션 생성
         function populateCategoryFilters() {
-            const category1Select = document.getElementById('category1');
-            const category2Select = document.getElementById('category2');
+            const categorySelect = document.getElementById('category');
             
-            // 1차 카테고리 옵션 생성 (카테고리 번호 기준 오름차순 정렬)
-            const category1Map = new Map();
+            // 2차 카테고리 옵션 생성 (카테고리 번호 기준 오름차순 정렬)
+            const categoryMap = new Map();
             products.forEach(product => {
-                if (product['1차 카테고리'] && product['1차 카테고리 No']) {
-                    category1Map.set(product['1차 카테고리'], product['1차 카테고리 No']);
+                if (product['2차 카테고리'] && product['2차 카테고리 No']) {
+                    const categoryKey = `${product['1차 카테고리']} > ${product['2차 카테고리']}`;
+                    categoryMap.set(categoryKey, {
+                        category1: product['1차 카테고리'],
+                        category2: product['2차 카테고리'],
+                        number: product['2차 카테고리 No']
+                    });
                 }
             });
             
             // 카테고리 번호 기준으로 오름차순 정렬
-            const sortedCategory1 = Array.from(category1Map.entries())
-                .sort((a, b) => a[1] - b[1]);
+            const sortedCategories = Array.from(categoryMap.entries())
+                .sort((a, b) => a[1].number - b[1].number);
             
-            sortedCategory1.forEach(([category, number]) => {
+            sortedCategories.forEach(([displayText, categoryData]) => {
                 const option = document.createElement('option');
-                option.value = category;
-                option.textContent = `${category} (${number})`;
-                category1Select.appendChild(option);
+                option.value = `${categoryData.category1}|${categoryData.category2}`;
+                option.textContent = `${displayText} (${categoryData.number})`;
+                categorySelect.appendChild(option);
             });
-        }
-
-        // 1차 카테고리 변경 시 2차 카테고리 업데이트
-        function updateCategory2Options() {
-            const category1 = document.getElementById('category1').value;
-            const category2Select = document.getElementById('category2');
-            
-            // 2차 카테고리 옵션 초기화
-            category2Select.innerHTML = '<option value="">전체</option>';
-            
-            if (category1) {
-                // 선택된 1차 카테고리에 해당하는 2차 카테고리만 필터링
-                const category2Map = new Map();
-                products.forEach(product => {
-                    if (product['1차 카테고리'] === category1 && 
-                        product['2차 카테고리'] && 
-                        product['2차 카테고리 No']) {
-                        category2Map.set(product['2차 카테고리'], product['2차 카테고리 No']);
-                    }
-                });
-                
-                // 카테고리 번호 기준으로 오름차순 정렬
-                const sortedCategory2 = Array.from(category2Map.entries())
-                    .sort((a, b) => a[1] - b[1]);
-                
-                sortedCategory2.forEach(([category, number]) => {
-                    const option = document.createElement('option');
-                    option.value = category;
-                    option.textContent = `${category} (${number})`;
-                    category2Select.appendChild(option);
-                });
-                
-                // 2차 카테고리 활성화
-                category2Select.disabled = false;
-            } else {
-                // 1차 카테고리가 선택되지 않으면 2차 카테고리 비활성화
-                category2Select.disabled = true;
-            }
         }
 
         // 제품 필터링
         function filterProducts() {
-            const category1 = document.getElementById('category1').value;
-            const category2 = document.getElementById('category2').value;
+            const categoryValue = document.getElementById('category').value;
             const searchTerm = document.getElementById('search').value.toLowerCase();
 
             filteredProducts = products.filter(product => {
-                const matchesCategory1 = !category1 || product['1차 카테고리'] === category1;
-                const matchesCategory2 = !category2 || product['2차 카테고리'] === category2;
+                let matchesCategory = true;
+                
+                if (categoryValue) {
+                    const [category1, category2] = categoryValue.split('|');
+                    matchesCategory = product['1차 카테고리'] === category1 && 
+                                    product['2차 카테고리'] === category2;
+                }
+                
                 const matchesSearch = !searchTerm || 
                     (product['제품명_정제'] && product['제품명_정제'].toLowerCase().includes(searchTerm)) ||
                     (product['브랜드명_kor'] && product['브랜드명_kor'].toLowerCase().includes(searchTerm));
 
-                return matchesCategory1 && matchesCategory2 && matchesSearch;
+                return matchesCategory && matchesSearch;
             });
 
             displayProducts();
@@ -552,15 +510,16 @@
             const totalProducts = isAuthenticated ? filteredProducts.length : Math.min(filteredProducts.length, 3);
             document.getElementById('total-count').textContent = totalProducts;
             
-            const category1 = document.getElementById('category1').value;
-            const category2 = document.getElementById('category2').value;
+            const categoryValue = document.getElementById('category').value;
             const searchTerm = document.getElementById('search').value;
             
             let filterText = '전체';
-            if (category1 || category2 || searchTerm) {
+            if (categoryValue || searchTerm) {
                 const filters = [];
-                if (category1) filters.push(`1차: ${category1}`);
-                if (category2) filters.push(`2차: ${category2}`);
+                if (categoryValue) {
+                    const [category1, category2] = categoryValue.split('|');
+                    filters.push(`카테고리: ${category1} > ${category2}`);
+                }
                 if (searchTerm) filters.push(`검색: ${searchTerm}`);
                 filterText = filters.join(', ');
             }
@@ -573,12 +532,7 @@
         }
 
         // 이벤트 리스너 등록
-        document.getElementById('category1').addEventListener('change', function() {
-            updateCategory2Options();
-            filterProducts();
-        });
-        
-        document.getElementById('category2').addEventListener('change', filterProducts);
+        document.getElementById('category').addEventListener('change', filterProducts);
         document.getElementById('search').addEventListener('input', filterProducts);
 
         // 페이지 로드 시 데이터 로드
