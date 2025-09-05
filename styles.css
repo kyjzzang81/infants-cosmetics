@@ -376,6 +376,7 @@ body {
 
 .modal-body {
   text-align: center;
+  padding: 15px;
 }
 
 #coupangIframe {
