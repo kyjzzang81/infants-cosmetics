@@ -121,10 +121,10 @@ function displayProducts() {
 
   noResults.style.display = "none";
 
-  // 인증되지 않은 경우 상위 3개만 표시
+  // 인증되지 않은 경우 상위 9개만 표시
   const productsToShow = isAuthenticated
     ? filteredProducts
-    : filteredProducts.slice(0, 3);
+    : filteredProducts.slice(0, 9);
 
   grid.innerHTML = productsToShow
     .map(
