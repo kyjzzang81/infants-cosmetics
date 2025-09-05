@@ -1,5 +1,21 @@
 [
   {
+    "1차 카테고리": "간식",
+    "1차 카테고리 No": 001,
+    "2차 카테고리": "간식",
+    "2차 카테고리 No": 101,
+    "제품링크의_제품명": "밭두렁",
+    "브랜드명_kor": "간식",
+    "브랜드명_eng": "PURELU",
+    "제품명_정제": "",
+    "제품링크": "https://link.coupang.com/a/cOTL5W",
+    "전성분_original": "",
+    "전성분_original_list": "",
+    "전성분_processed": "",
+    "전성분_notinDB": "[]",
+    "쿠팡 파트너스 링크": "<iframe src=\"https://coupa.ng/cjLzCd\" width=\"120\" height=\"240\" frameborder=\"0\" scrolling=\"no\" referrerpolicy=\"unsafe-url\" browsingtopics></iframe>"
+  },
+  {
     "1차 카테고리": "유아 세정",
     "1차 카테고리 No": 110,
     "2차 카테고리": "올인원워시&바디워시",
