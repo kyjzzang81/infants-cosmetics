@@ -121,10 +121,10 @@ function displayProducts() {
 
   noResults.style.display = "none";
 
-  // 인증되지 않은 경우 상위 9개만 표시
+  // 인증되지 않은 경우 상위 21개만 표시
   const productsToShow = isAuthenticated
     ? filteredProducts
-    : filteredProducts.slice(0, 9);
+    : filteredProducts.slice(0, 13);
 
   grid.innerHTML = productsToShow
     .map(
@@ -133,35 +133,22 @@ function displayProducts() {
             <div class="product-title">${
               product["제품명_정제"] || "제품명 없음"
             }</div>
-            <div class="product-brand">${product["브랜드명_kor"] || ""} ${
-        product["브랜드명_eng"] || ""
-      }</div>
-            <div class="product-category">${product["1차 카테고리"] || ""} > ${
-        product["2차 카테고리"] || ""
-      }</div>
             <div class="product-actions">
                 ${
                   product["제품링크"]
                     ? `<a href="${product["제품링크"]}" target="_blank" class="product-link">제품 보기</a>`
                     : ""
                 }
-                ${
-                  product["쿠팡 파트너스 링크"] &&
-                  product["쿠팡 파트너스 링크"].trim() !== ""
-                    ? `<button class="purchase-btn" onclick="openCoupangModal(${index})">구매하기</button>`
-                    : '<span class="purchase-btn-disabled">구매하기 (링크 준비중)</span>'
-                }
             </div>
             ${
-              product["전성분_processed"]
+              product["쿠팡 파트너스 링크"] &&
+              product["쿠팡 파트너스 링크"].trim() !== ""
                 ? `
-                <div class="ingredients">
-                    <h4>주요 성분</h4>
-                    <div class="ingredients-list">${product[
-                      "전성분_processed"
-                    ].slice(0, 200)}${
-                    product["전성분_processed"].length > 200 ? "..." : ""
-                  }</div>
+                <div class="coupang-iframe-container">
+                    <div class="iframe-content">${product["쿠팡 파트너스 링크"]}</div>
+                    <div class="iframe-footer">
+                        <p>이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
+                    </div>
                 </div>
             `
                 : ""
@@ -172,51 +159,11 @@ function displayProducts() {
     .join("");
 }
 
-// 쿠팡 모달 열기
-function openCoupangModal(productIndex) {
-  const modal = document.getElementById("coupangModal");
-  const iframeContainer = document.getElementById("coupangIframe");
-
-  // 현재 표시된 제품들 중에서 해당 인덱스의 제품 찾기
-  const productsToShow = isAuthenticated
-    ? filteredProducts
-    : filteredProducts.slice(0, 3);
-  const product = productsToShow[productIndex];
-
-  if (product && product["쿠팡 파트너스 링크"]) {
-    // iframe 코드를 HTML로 삽입
-    iframeContainer.innerHTML = product["쿠팡 파트너스 링크"];
-
-    // 모달 표시
-    modal.style.display = "block";
-
-    // body 스크롤 방지
-    document.body.style.overflow = "hidden";
-  } else {
-    alert("쿠팡 파트너스 링크를 찾을 수 없습니다.");
-  }
-}
-
-// 쿠팡 모달 닫기
-function closeModal() {
-  const modal = document.getElementById("coupangModal");
-  const iframeContainer = document.getElementById("coupangIframe");
-
-  // 모달 숨기기
-  modal.style.display = "none";
-
-  // iframe 내용 제거
-  iframeContainer.innerHTML = "";
-
-  // body 스크롤 복원
-  document.body.style.overflow = "auto";
-}
-
 // 통계 업데이트
 function updateStats() {
   const totalProducts = isAuthenticated
     ? filteredProducts.length
-    : Math.min(filteredProducts.length, 3);
+    : Math.min(filteredProducts.length, 21);
   document.getElementById("total-count").textContent = totalProducts;
 
   const categoryValue = document.getElementById("category").value;
@@ -233,7 +180,7 @@ function updateStats() {
     filterText = filters.join(", ");
   }
 
-  if (!isAuthenticated && filteredProducts.length > 3) {
+  if (!isAuthenticated && filteredProducts.length > 21) {
     filterText += ` (미리보기: ${totalProducts}/${filteredProducts.length})`;
   }
 
@@ -256,21 +203,6 @@ function initializeEventListeners() {
     .getElementById("category")
     .addEventListener("change", filterProducts);
   document.getElementById("search").addEventListener("input", filterProducts);
-
-  // 모달 외부 클릭 시 닫기
-  window.addEventListener("click", function (event) {
-    const modal = document.getElementById("coupangModal");
-    if (event.target === modal) {
-      closeModal();
-    }
-  });
-
-  // ESC 키로 모달 닫기
-  document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape") {
-      closeModal();
-    }
-  });
 }
 
 // 페이지 로드 시 초기화
